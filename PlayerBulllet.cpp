@@ -9,7 +9,7 @@ void PlayerBulllet::Initialize(Model* model, const Vector3& position)
 
 	model_ = model;
 	
-
+	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 }
 
