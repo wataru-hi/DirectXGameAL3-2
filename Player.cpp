@@ -3,6 +3,10 @@
 
 using namespace MathUtility;
 
+Player::~Player()
+{
+}
+
 void Player::Initialize(Model* model, uint32_t textureHandle)
 {
 	assert(model);
@@ -15,6 +19,8 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 void Player::Update()
 {
+	bullets_.remove_if([](std::shared_ptr<PlayerBulllet> bullet) {return bullet->IsDead(); });
+
 	Vector3 move = {0,0,0};
 
 	//押した方向で移動ベクトルを変更
@@ -52,7 +58,10 @@ void Player::Update()
 
 	Attack();
 
-	if(Bullet_){Bullet_->Update();}
+	for (std::shared_ptr<PlayerBulllet> bullet : bullets_)
+	{
+		bullet->Update();
+	}
 
 	worldTransform_.UpdateMatrix();
 }
@@ -60,7 +69,10 @@ void Player::Update()
 void Player::Draw(Camera& camera)
 {
 	model_->Draw(worldTransform_, camera, textureHandle_);
-	if(Bullet_){Bullet_->Draw(camera);}
+	for (std::shared_ptr<PlayerBulllet> bullet : bullets_)
+	{
+		bullet->Draw(camera);
+	}
 }
 
 void Player::Rotate()
@@ -82,9 +94,13 @@ void Player::Attack()
 {
 	if (input_->PushKey(DIK_SPACE))
 	{
-		PlayerBulllet* newBullet = new PlayerBulllet();
-		newBullet->Initialize(model_, worldTransform_.translation_);
+		Vector3 velocity(0, 0, kBulletSpeed);
 
-		Bullet_ = newBullet;
+		velocity = TransformNormal(velocity, worldTransform_.matWorld_);
+
+		std::shared_ptr<PlayerBulllet> bullet(new PlayerBulllet);
+		bullet->Initialize(model_, worldTransform_.translation_, velocity);
+		bullets_.push_back(bullet);
+			
 	}
 }

@@ -4,6 +4,7 @@
 
 using namespace KamataEngine;
 class Player;
+class Enemy;
 
 class GameScene
 {
@@ -46,6 +47,7 @@ private:
 	Model* model_ = nullptr;
 	Camera camera;
 	Player* player_ = nullptr;
+	Enemy* enemy_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 
 	bool isDebugCameraActive_ = false;

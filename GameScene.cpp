@@ -1,6 +1,7 @@
 #include "GameScene.h"
 
 #include "Player.h"
+#include "Enemy.h"
 
 #include <cassert>
 
@@ -25,6 +26,9 @@ void GameScene::Initialize() {
 
 	player_ = new Player();
 	player_->Initialize(model_, textureHandle_);
+
+	enemy_ = new Enemy();
+	enemy_->Initialize()
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
