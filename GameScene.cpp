@@ -9,7 +9,8 @@ GameScene::GameScene() {
 }
 
 GameScene::~GameScene() {
-	delete model_;
+	delete playerModel_;
+	delete enemyModel_;
 	delete debugCamera_;
 }
 
@@ -19,16 +20,19 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 
-	textureHandle_ = TextureManager::Load("mario.jpg");
-	model_ = Model::Create();
+	playerTextureHandle_ = TextureManager::Load("mario.jpg");
+	playerModel_ = Model::Create();
+
+	enemyTextureHandle_ = TextureManager::Load("Enemy.png");
+	enemyModel_ = Model::Create();
 
 	camera.Initialize();
 
 	player_ = new Player();
-	player_->Initialize(model_, textureHandle_);
+	player_->Initialize(playerModel_, playerTextureHandle_);
 
 	enemy_ = new Enemy();
-	enemy_->Initialize()
+	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(0,2, 20));
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -37,6 +41,7 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 	player_->Update();
+	enemy_->Update();
 #ifdef _DEBUG
 	if(input_->TriggerKey(DIK_Q)){
 		isDebugCameraActive_ = !isDebugCameraActive_;
@@ -80,6 +85,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
+	if (enemy_ != nullptr) {
+		enemy_->Draw(camera);
+	}
 	player_->Draw(camera);
 
 	// 3Dオブジェクト描画後処理
