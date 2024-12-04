@@ -8,8 +8,7 @@ enum class Phase {
 	Leave,
 };
 
-class Enemy
-{
+class Enemy {
 public:
 	void Initialize(Model* model, uint32_t textureHandle, const Vector3& position);
 
@@ -17,7 +16,14 @@ public:
 
 	void Draw(const Camera& viewProjection);
 
+	void Move();
+
+	void PrintImGui();
+
+	void Set(float* a, Vector3* b) { b->x = a[0], b->y = a[1], b->z = a[2]; }
+
 	bool IsDead() const { return isDead_; }
+
 private:
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
@@ -27,4 +33,3 @@ private:
 
 	Phase phase_ = Phase::Apprach;
 };
-
