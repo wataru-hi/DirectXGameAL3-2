@@ -2,6 +2,12 @@
 #include "KamataEngine.h"
 
 using namespace KamataEngine;
+
+enum class Phase {
+	Apprach,
+	Leave,
+};
+
 class Enemy
 {
 public:
@@ -18,5 +24,7 @@ private:
 	uint32_t textureHandle_ = 0;
 
 	bool isDead_ = false;
+
+	Phase phase_ = Phase::Apprach;
 };
 
