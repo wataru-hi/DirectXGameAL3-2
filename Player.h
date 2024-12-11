@@ -4,14 +4,13 @@
 #include "PlayerBulllet.h"
 
 using namespace KamataEngine;
-
 class Player
 {
 public:
 	~Player();
 	void Initialize(Model* model, uint32_t textureHandle);
 
-	void Update();
+	void Update(bool isCamera);
 
 	void Draw(Camera& camera);
 
@@ -21,6 +20,7 @@ private:
 	uint32_t textureHandle_ = 0;
 	Input* input_ = nullptr;
 
+	void Move();
 	void Rotate();
 	void Attack();
 
@@ -33,5 +33,5 @@ private:
 
 	const float kBulletSpeed = 1.0f;
 
-	
+	bool isMove;
 };

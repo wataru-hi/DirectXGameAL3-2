@@ -3,6 +3,7 @@
 #include <KamataEngine.h>
 
 using namespace KamataEngine;
+using namespace MathUtility;
 class Player;
 class Enemy;
 
@@ -39,6 +40,15 @@ private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 
+	void Set(float* a, Vector3* b) { b->x = a[0], b->y = a[1], b->z = a[2]; }
+	
+	const float cameraLerpTime = 1.0f;
+	float cameraLerpTimer;
+
+	Vector3 LerpVec(const Vector3& v1, const Vector3& v2, float t) {
+		return Vector3(Lerp(v1.x, v2.x, t), Lerp(v1.y, v2.y, t), Lerp(v1.z, v2.z, t));
+	}
+
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
@@ -52,6 +62,12 @@ private:
 	Enemy* enemy_ = nullptr;
 	//std::list<std::shared_ptr<Enemy>> enemies_;
 	DebugCamera* debugCamera_ = nullptr;
+
+	Vector3 mainCameraP;
+	Vector3 subCameraP;
+	Vector3 mainCameraR;
+	Vector3 subCameraR;
+	bool isMainCamera = true;
 
 	bool isDebugCameraActive_ = false;
 };

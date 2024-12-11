@@ -13,33 +13,18 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	model_ = model;
 	textureHandle_ = textureHandle;
 	worldTransform_.Initialize();
+	
 
 	input_ = Input::GetInstance();
 }
 
-void Player::Update()
+void Player::Update(bool isCamera)
 {
 	bullets_.remove_if([](std::shared_ptr<PlayerBulllet> bullet) {return bullet->IsDead(); });
 
-	Vector3 move = {0,0,0};
+	isMove = isCamera;
 
-	//押した方向で移動ベクトルを変更
-	if (input_->PushKey(DIK_LEFT)) {
-		move.x -= kCaracterSpeed;
-	}
-	else if (input_->PushKey(DIK_RIGHT)){
-		move.x += kCaracterSpeed;
-	}
-	if (input_->PushKey(DIK_DOWN)) {
-		move.y -= kCaracterSpeed;
-	}
-	else if (input_->PushKey(DIK_UP)){
-		move.y += kCaracterSpeed;
-	}
-	
-	Rotate();
-
-	worldTransform_.translation_ += move;
+	Move();
 	
 	float PlayerTranslate[3] = {worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z};
 
@@ -68,11 +53,53 @@ void Player::Update()
 
 void Player::Draw(Camera& camera)
 {
-	model_->Draw(worldTransform_, camera, textureHandle_);
+	model_->Draw(worldTransform_, camera);
 	for (std::shared_ptr<PlayerBulllet> bullet : bullets_)
 	{
 		bullet->Draw(camera);
 	}
+}
+
+void Player::Move()
+{
+	Vector3 move = {0,0,0};
+	
+	if(isMove)
+	{
+		//押した方向で移動ベクトルを変更
+		if (input_->PushKey(DIK_LEFT)) {
+			move.x -= kCaracterSpeed;
+		}
+		else if (input_->PushKey(DIK_RIGHT)) {
+			move.x += kCaracterSpeed;
+		}
+		if (input_->PushKey(DIK_DOWN)) {
+			move.y -= kCaracterSpeed;
+		}
+		else if (input_->PushKey(DIK_UP)) {
+			move.y += kCaracterSpeed;
+		}
+	}
+	else
+	{
+		//押した方向で移動ベクトルを変更
+		if (input_->PushKey(DIK_LEFT)) {
+			move.x -= kCaracterSpeed;
+		}
+		else if (input_->PushKey(DIK_RIGHT)) {
+			move.x += kCaracterSpeed;
+		}
+		if (input_->PushKey(DIK_DOWN)) {
+			move.z -= kCaracterSpeed;
+		}
+		else if (input_->PushKey(DIK_UP)) {
+			move.z += kCaracterSpeed;
+		}
+	}
+
+	Rotate();
+
+	worldTransform_.translation_ += move;
 }
 
 void Player::Rotate()
