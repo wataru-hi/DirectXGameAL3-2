@@ -74,7 +74,9 @@ void Player::Draw(Camera& camera)
 		bullet->Draw(camera);
 	}
 }
-
+void Player::OnCollision()
+{
+}
 void Player::Rotate()
 {
 	const float kRotSpeed = 0.02f;
@@ -98,7 +100,7 @@ void Player::Attack()
 
 		velocity = TransformNormal(velocity, worldTransform_.matWorld_);
 
-		std::shared_ptr<PlayerBulllet> bullet(new PlayerBulllet);
+		std::shared_ptr<PlayerBulllet> bullet = std::make_shared<PlayerBulllet>();
 		bullet->Initialize(model_, worldTransform_.translation_, velocity);
 		bullets_.push_back(bullet);
 			

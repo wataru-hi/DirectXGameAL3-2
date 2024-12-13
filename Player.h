@@ -2,6 +2,7 @@
 
 #include "KamataEngine.h"
 #include "PlayerBulllet.h"
+#include "Affin.h"
 
 using namespace KamataEngine;
 
@@ -15,6 +16,11 @@ public:
 
 	void Draw(Camera& camera);
 
+	Vector3 GetWorldPosition(){ return GetWorldPos(worldTransform_); };
+
+	 const std::list<std::shared_ptr<PlayerBulllet>>& GetBullets() const { return bullets_; }
+
+	 void OnCollision();
 private:
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
@@ -23,6 +29,7 @@ private:
 
 	void Rotate();
 	void Attack();
+	
 
 	std::list<std::shared_ptr<PlayerBulllet> >bullets_;
 

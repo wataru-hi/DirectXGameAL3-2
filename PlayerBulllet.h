@@ -2,6 +2,8 @@
 
 #include "KamataEngine.h"
 
+#include "Affin.h"
+
 using namespace KamataEngine;
 
 class PlayerBulllet
@@ -14,7 +16,14 @@ public:
 	void Draw(const Camera& viewProjection);
 
 	bool IsDead() const { return isDead_; }
+
+	Vector3 GetWorldPosition(){ return GetWorldPos(worldTransform_); };
+
+	void OnCollision();
 private:
+	
+
+
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
 

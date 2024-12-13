@@ -1,5 +1,9 @@
 #include "Affin.h"
 using namespace MathUtility;
+Vector3 GetWorldPos(const WorldTransform& v)
+{
+	return { v.matWorld_.m[3][0], v.matWorld_.m[3][1], v.matWorld_.m[3][2] };
+}
 
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2)
 {

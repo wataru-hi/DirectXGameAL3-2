@@ -35,6 +35,9 @@ class GameScene
 	void Draw();
 
 private:
+	bool IsCollisionSphereAndSphere(const Vector3& posA, float radiusA, const Vector3& posB, float radiusB);
+	void CheakAllCollisions();
+
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;

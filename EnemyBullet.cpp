@@ -1,5 +1,7 @@
 #include "EnemyBullet.h"
 
+using namespace MathUtility;
+
 void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
 	assert(model);
@@ -17,7 +19,7 @@ void EnemyBullet::Update()
 		isDead_ = true;
 	}
 
-	worldTransform_.translation_.z += velocity_.z;
+	worldTransform_.translation_ += velocity_;
 
 	ImGui::Begin("bullet");
 	ImGui::Text("%f, %f, %f", worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z);
@@ -29,4 +31,9 @@ void EnemyBullet::Update()
 void EnemyBullet::Draw(const Camera& camera)
 {
 	model_->Draw(worldTransform_, camera);
+}
+
+void EnemyBullet::OnCollision()
+{
+	isDead_ = true;
 }

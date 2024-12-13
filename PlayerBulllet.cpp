@@ -30,3 +30,8 @@ void PlayerBulllet::Draw(const Camera& viewProjection)
 {
 	model_->Draw(worldTransform_, viewProjection);
 }
+
+void PlayerBulllet::OnCollision()
+{
+	isDead_ = true;
+}

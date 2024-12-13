@@ -1,12 +1,12 @@
 #include "GameScene.h"
 
-#include "Player.h"
 #include "Enemy.h"
+#include "Player.h"
 
-#include <cassert>
-
-GameScene::GameScene() {
-}
+#include "EnemyBullet.h"
+#include "PlayerBulllet.h"
+using namespace MathUtility;
+GameScene::GameScene() {}
 
 GameScene::~GameScene() {
 	delete playerModel_;
@@ -32,7 +32,8 @@ void GameScene::Initialize() {
 	player_->Initialize(playerModel_, playerTextureHandle_);
 
 	enemy_ = new Enemy();
-	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(10,2, 20));
+	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(10, 2, 20));
+	enemy_->SetPlayer(player_);
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -42,19 +43,19 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 	player_->Update();
 	enemy_->Update();
+	CheakAllCollisions();
 #ifdef _DEBUG
-	if(input_->TriggerKey(DIK_Q)){
+	if (input_->TriggerKey(DIK_Q)) {
 		isDebugCameraActive_ = !isDebugCameraActive_;
 	}
 #endif
-	if (isDebugCameraActive_)
-	{
+	if (isDebugCameraActive_) {
 		debugCamera_->Update();
 		camera.matView = debugCamera_->GetCamera().matView;
 		camera.matProjection = debugCamera_->GetCamera().matProjection;
 		// ビュープロジェクションの転送
 		camera.TransferMatrix();
-	}else {
+	} else {
 		camera.UpdateMatrix();
 	}
 }
@@ -106,4 +107,40 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 
 #pragma endregion
+}
+
+bool GameScene::IsCollisionSphereAndSphere(const Vector3& posA, float radiusA, const Vector3& posB, float radiusB) {
+	float distance = Length((posA - posB));
+	return distance <= radiusA + radiusB;
+}
+
+void GameScene::CheakAllCollisions() {
+	float radius = 1.0f;
+	Vector3 playerPos = player_->GetWorldPosition();
+	float playerRadius = radius;
+	const std::list<std::shared_ptr<EnemyBullet>>& enemyBullets = enemy_->GetBullets();
+
+	for (const auto& bullet : enemyBullets) {
+		Vector3 bulletPos = bullet->GetWorldPosition();
+		float bulletRadius = radius;
+
+		if (IsCollisionSphereAndSphere(playerPos, playerRadius, bulletPos, bulletRadius)) {
+			player_->OnCollision();
+			bullet->OnCollision();
+		}
+	}
+
+	// 敵とプレイヤーの弾の当たり判定
+	Vector3 enemyPos = enemy_->GetWorldPosition();
+	float enemyRadius = radius;
+	const std::list<std::shared_ptr<PlayerBulllet>>& playerBullets = player_->GetBullets();
+	for (const auto& bullet : playerBullets) {
+		Vector3 bulletPos = bullet->GetWorldPosition();
+		float bulletRadius = radius;
+
+		if (IsCollisionSphereAndSphere(enemyPos, enemyRadius, bulletPos, bulletRadius)) {
+			enemy_->OnCollision();
+			bullet->OnCollision();
+		}
+	}
 }
