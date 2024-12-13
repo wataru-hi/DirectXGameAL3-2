@@ -32,7 +32,7 @@ void GameScene::Initialize() {
 	player_->Initialize(playerModel_, playerTextureHandle_);
 
 	enemy_ = new Enemy();
-	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(0,2, 20));
+	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(10,2, 20));
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);

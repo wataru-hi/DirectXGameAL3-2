@@ -1,6 +1,8 @@
 #pragma once
 #include "KamataEngine.h"
 
+class EnemyBullet;
+
 using namespace KamataEngine;
 
 enum class Phase {
@@ -25,6 +27,8 @@ public:
 	bool IsDead() const { return isDead_; }
 
 private:
+	void fire();
+
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
 	uint32_t textureHandle_ = 0;
@@ -32,4 +36,6 @@ private:
 	bool isDead_ = false;
 
 	Phase phase_ = Phase::Apprach;
+
+	std::list<std::shared_ptr<EnemyBullet>> bullets_;
 };

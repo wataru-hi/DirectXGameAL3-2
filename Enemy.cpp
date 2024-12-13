@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "EnemyBullet.h"
 
 void Enemy::Initialize(Model* model, uint32_t textureHandle, const Vector3& position)
 {
@@ -9,6 +10,8 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle, const Vector3& posi
 
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
+
+	fire();
 }
 
 void Enemy::Update()
@@ -20,12 +23,23 @@ void Enemy::Update()
 
 	PrintImGui();
 
+	for (std::shared_ptr<EnemyBullet> bullet : bullets_)
+	{
+		bullet->Update();
+	}
+	bullets_.remove_if([](const std::shared_ptr<EnemyBullet>& bullet) { return bullet->IsDead();});
+
 	worldTransform_.UpdateMatrix();
 }
 
-void Enemy::Draw(const Camera& viewProjection)
+void Enemy::Draw(const Camera& camera)
 {
-	model_->Draw(worldTransform_, viewProjection);
+	model_->Draw(worldTransform_, camera);
+
+	for (std::shared_ptr<EnemyBullet> enemyBullet : bullets_)
+	{
+		enemyBullet->Draw(camera);
+	}
 }
 
 void Enemy::Move()
@@ -54,4 +68,11 @@ void Enemy::PrintImGui()
 	ImGui::End();
 
 	Set(&(*pos), &worldTransform_.translation_);
+}
+
+void Enemy::fire()
+{
+	std::shared_ptr<EnemyBullet> bullet(new EnemyBullet);
+	bullet->Initialize(model_, worldTransform_.translation_, Vector3{0.0f, 0.0f, -0.5f});
+	bullets_.push_back(bullet);
 }
