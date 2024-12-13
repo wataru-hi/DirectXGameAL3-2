@@ -1,14 +1,18 @@
 #include "GameScene.h"
 
-
-#include "Skydome.h"
 #include "RailCamera.h"
+#include "Skydome.h"
 
 #include "Enemy.h"
 #include "Player.h"
 
 #include "EnemyBullet.h"
 #include "PlayerBulllet.h"
+
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <string>
 using namespace MathUtility;
 GameScene::GameScene() {}
 
@@ -25,8 +29,8 @@ void GameScene::Initialize() {
 	audio_ = Audio::GetInstance();
 
 	skydomeModel_ = Model::CreateFromOBJ("SkyDome"); // Skydome.objを読み込む
-    skydome_ = new Skydome();
-    skydome_->Initialize(skydomeModel_);
+	skydome_ = new Skydome();
+	skydome_->Initialize(skydomeModel_);
 
 	playerTextureHandle_ = TextureManager::Load("mario.jpg");
 	playerModel_ = Model::Create();
@@ -39,20 +43,15 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	
 
-	enemy_ = new Enemy();
-	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(10, 2, 20));
-	enemy_->SetPlayer(player_);
-
 	railCamera = new RailCamera();
 	railCamera->Initialize(camera.translation_, camera.rotation_);
 
 	player_->SetParent(&railCamera->GetWorldTransform());
 
-	Vector3 playerPostion( 0.0f, 0.0f, 10.0f);
+	Vector3 playerPostion(0.0f, 0.0f, 10.0f);
 	player_->Initialize(playerModel_, playerTextureHandle_, playerPostion);
 
 	player_->SetGameScene(this);
-	enemy_->SetGameScene(this);
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -60,10 +59,22 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
-	 skydome_->Update();
+	if (popIsDirei) {
+		waitTimer--;
+		if (waitTimer <= 0)
+		{
+			popIsDirei = false;
+		}
+		return;
+	}
 	
+	skydome_->Update();
+	for (std::shared_ptr<Enemy> enemy : enemies)
+	{
+		enemy->Update();
+	}
 	player_->Update();
-	enemy_->Update();
+	
 
 	BulletUpdate();
 	CheakAllCollisions();
@@ -72,7 +83,6 @@ void GameScene::Update() {
 	camera.matView = railCamera->GetCamera().matView;
 	camera.matProjection = railCamera->GetCamera().matProjection;
 	camera.UpdateMatrix();
-	
 
 #ifdef _DEBUG
 	if (input_->TriggerKey(DIK_Q)) {
@@ -116,11 +126,12 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	
-	 skydome_->Draw(camera); 
 
-	if (enemy_ != nullptr) {
-		enemy_->Draw(camera);
+	skydome_->Draw(camera);
+
+	for (std::shared_ptr<Enemy> enemy : enemies)
+	{
+		enemy->Update();
 	}
 
 	BulletDrow();
@@ -165,41 +176,96 @@ void GameScene::CheakAllCollisions() {
 	}
 
 	// 敵とプレイヤーの弾の当たり判定
-	Vector3 enemyPos = enemy_->GetWorldPosition();
-	float enemyRadius = radius;
-	for (const auto& bullet : playerbullets_) {
-		Vector3 bulletPos = bullet->GetWorldPosition();
-		float bulletRadius = radius;
+	for(std::shared_ptr<Enemy> enemy : enemies){
+		Vector3 enemyPos = enemy->GetWorldPosition();
+		float enemyRadius = radius;
+		for (const auto& bullet : playerbullets_) {
+			Vector3 bulletPos = bullet->GetWorldPosition();
+			float bulletRadius = radius;
 
-		if (IsCollisionSphereAndSphere(enemyPos, enemyRadius, bulletPos, bulletRadius)) {
-			enemy_->OnCollision();
-			bullet->OnCollision();
+			if (IsCollisionSphereAndSphere(enemyPos, enemyRadius, bulletPos, bulletRadius)) {
+				enemy->OnCollision();
+				bullet->OnCollision();
+			}
 		}
 	}
 }
 
-void GameScene::BulletUpdate()
-{
+void GameScene::BulletUpdate() {
 	playerbullets_.remove_if([](std::shared_ptr<PlayerBulllet> a) { return a->IsDead(); });
 	enemybullets_.remove_if([](std::shared_ptr<EnemyBullet> a) { return a->IsDead(); });
-	for (std::shared_ptr<PlayerBulllet> Bullet : playerbullets_)
-	{
+	for (std::shared_ptr<PlayerBulllet> Bullet : playerbullets_) {
 		Bullet->Update();
 	}
-	for (std::shared_ptr<EnemyBullet> Bullet : enemybullets_)
-	{
+	for (std::shared_ptr<EnemyBullet> Bullet : enemybullets_) {
 		Bullet->Update();
 	}
 }
 
-void GameScene::BulletDrow()
-{
-	for (std::shared_ptr<PlayerBulllet> Bullet : playerbullets_)
-	{
+void GameScene::BulletDrow() {
+	for (std::shared_ptr<PlayerBulllet> Bullet : playerbullets_) {
 		Bullet->Draw(camera);
 	}
-	for (std::shared_ptr<EnemyBullet> Bullet : enemybullets_)
-	{
+	for (std::shared_ptr<EnemyBullet> Bullet : enemybullets_) {
 		Bullet->Draw(camera);
+	}
+}
+
+void GameScene::LoadEnemyPopDate() {
+	std::ifstream file;
+	std::stringstream enemyPopCommands; // Declare enemyPopCommands
+
+	file.open("CSVのファイルパス"); // Added closing quote
+#ifdef _DEBUG
+	assert(file.is_open());
+#endif
+	enemyPopCommands << file.rdbuf();
+
+	file.close();
+}
+
+void GameScene::UpdateEnemyPopDate() {
+	std::string line;
+
+	while (std::getline(enemyPosCommand, line)) {
+		std::istringstream line_stream(line);
+
+		std::string word;
+		std::getline(line_stream, word, ',');
+
+		if (word.find("//") == 0) {
+			continue;
+		}
+
+		if (word.find("POP") == 0) {
+			// x座標
+			getline(line_stream, word, ',');
+			float x = (float)std::atof(word.c_str());
+
+			// y座標
+			getline(line_stream, word, ',');
+			float y = (float)std::atof(word.c_str());
+
+			// z座標
+			getline(line_stream, word, ',');
+			float z = (float)std::atof(word.c_str());
+
+			// 敵を発生させる
+			std::shared_ptr<Enemy> enemy(new Enemy);
+			enemy->Initialize(enemyModel_, enemyTextureHandle_, Vector3(x, y, z));
+			enemy->SetPlayer(player_);
+			enemy->SetGameScene(this);
+			enemies.push_back(enemy);
+		} else if (word.find("WAIT") == 0) {
+			getline(line_stream, word, ','); // 待機時間
+			int32_t waitTime = atoi(word.c_str());
+
+			// 待機開始
+			popIsDirei = true;
+			waitTimer = waitTime;
+
+			// コマンドループを抜ける
+			break;
+		}
 	}
 }

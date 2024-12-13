@@ -44,4 +44,5 @@ private:
 	float BulletTimer = 0.0f;
 
 	GameScene* gameScene_;
+
 };

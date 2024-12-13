@@ -2,6 +2,8 @@
 
 #include "KamataEngine.h"
 
+#include <sstream>
+
 using namespace KamataEngine;
 class Player;
 class Enemy;
@@ -50,6 +52,7 @@ private:
 	void BulletDrow();
 
 	void LoadEnemyPopDate();
+	void UpdateEnemyPopDate();
 
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
@@ -69,7 +72,6 @@ private:
 	Camera camera;
 	
 	Player* player_ = nullptr;
-	Enemy* enemy_ = nullptr;
 	
 	Skydome* skydome_ = nullptr;
 	RailCamera* railCamera = nullptr;
@@ -77,7 +79,13 @@ private:
 
 	std::list<std::shared_ptr<PlayerBulllet>>playerbullets_;
 	std::list<std::shared_ptr<EnemyBullet>>enemybullets_;
+	std::list<std::shared_ptr<Enemy>>enemies;
 
 	bool isDebugCameraActive_ = false;
+
+	std::stringstream enemyPosCommand;
+
+	bool popIsDirei;
+	int32_t waitTimer;
 };
 
