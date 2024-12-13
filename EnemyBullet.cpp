@@ -4,7 +4,7 @@ using namespace MathUtility;
 
 void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
-	assert(model);
+	//assert(model);
 	model_  = model;
 
 	worldTransform_.Initialize();
@@ -21,9 +21,12 @@ void EnemyBullet::Update()
 
 	worldTransform_.translation_ += velocity_;
 
+#ifdef _DEBUG
+
 	ImGui::Begin("bullet");
 	ImGui::Text("%f, %f, %f", worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z);
 	ImGui::End();
+#endif // #ifdef _DEBUG
 
 	worldTransform_.UpdateMatrix();
 }

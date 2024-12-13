@@ -2,6 +2,7 @@
 
 
 #include "Skydome.h"
+#include "RailCamera.h"
 
 #include "Enemy.h"
 #include "Player.h"
@@ -36,11 +37,22 @@ void GameScene::Initialize() {
 	camera.Initialize();
 
 	player_ = new Player();
-	player_->Initialize(playerModel_, playerTextureHandle_);
+	
 
 	enemy_ = new Enemy();
 	enemy_->Initialize(enemyModel_, enemyTextureHandle_, Vector3(10, 2, 20));
 	enemy_->SetPlayer(player_);
+
+	railCamera = new RailCamera();
+	railCamera->Initialize(camera.translation_, camera.rotation_);
+
+	player_->SetParent(&railCamera->GetWorldTransform());
+
+	Vector3 playerPostion( 0.0f, 0.0f, 10.0f);
+	player_->Initialize(playerModel_, playerTextureHandle_, playerPostion);
+
+	player_->SetGameScene(this);
+	enemy_->SetGameScene(this);
 
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -52,7 +64,16 @@ void GameScene::Update() {
 	
 	player_->Update();
 	enemy_->Update();
+
+	BulletUpdate();
 	CheakAllCollisions();
+
+	railCamera->Update();
+	camera.matView = railCamera->GetCamera().matView;
+	camera.matProjection = railCamera->GetCamera().matProjection;
+	camera.UpdateMatrix();
+	
+
 #ifdef _DEBUG
 	if (input_->TriggerKey(DIK_Q)) {
 		isDebugCameraActive_ = !isDebugCameraActive_;
@@ -101,6 +122,8 @@ void GameScene::Draw() {
 	if (enemy_ != nullptr) {
 		enemy_->Draw(camera);
 	}
+
+	BulletDrow();
 	player_->Draw(camera);
 
 	// 3Dオブジェクト描画後処理
@@ -130,9 +153,8 @@ void GameScene::CheakAllCollisions() {
 	float radius = 1.0f;
 	Vector3 playerPos = player_->GetWorldPosition();
 	float playerRadius = radius;
-	const std::list<std::shared_ptr<EnemyBullet>>& enemyBullets = enemy_->GetBullets();
 
-	for (const auto& bullet : enemyBullets) {
+	for (const auto& bullet : enemybullets_) {
 		Vector3 bulletPos = bullet->GetWorldPosition();
 		float bulletRadius = radius;
 
@@ -145,8 +167,7 @@ void GameScene::CheakAllCollisions() {
 	// 敵とプレイヤーの弾の当たり判定
 	Vector3 enemyPos = enemy_->GetWorldPosition();
 	float enemyRadius = radius;
-	const std::list<std::shared_ptr<PlayerBulllet>>& playerBullets = player_->GetBullets();
-	for (const auto& bullet : playerBullets) {
+	for (const auto& bullet : playerbullets_) {
 		Vector3 bulletPos = bullet->GetWorldPosition();
 		float bulletRadius = radius;
 
@@ -154,5 +175,31 @@ void GameScene::CheakAllCollisions() {
 			enemy_->OnCollision();
 			bullet->OnCollision();
 		}
+	}
+}
+
+void GameScene::BulletUpdate()
+{
+	playerbullets_.remove_if([](std::shared_ptr<PlayerBulllet> a) { return a->IsDead(); });
+	enemybullets_.remove_if([](std::shared_ptr<EnemyBullet> a) { return a->IsDead(); });
+	for (std::shared_ptr<PlayerBulllet> Bullet : playerbullets_)
+	{
+		Bullet->Update();
+	}
+	for (std::shared_ptr<EnemyBullet> Bullet : enemybullets_)
+	{
+		Bullet->Update();
+	}
+}
+
+void GameScene::BulletDrow()
+{
+	for (std::shared_ptr<PlayerBulllet> Bullet : playerbullets_)
+	{
+		Bullet->Draw(camera);
+	}
+	for (std::shared_ptr<EnemyBullet> Bullet : enemybullets_)
+	{
+		Bullet->Draw(camera);
 	}
 }

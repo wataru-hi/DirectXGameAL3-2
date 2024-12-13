@@ -3,8 +3,8 @@
 
 #include "Affin.h"
 
-class EnemyBullet;
 class Player;
+class GameScene;
 
 using namespace KamataEngine;
 
@@ -33,11 +33,11 @@ public:
 
 	Vector3 GetWorldPosition(){ return GetWorldPos(worldTransform_); }
 
-	const std::list<std::shared_ptr<EnemyBullet>>& GetBullets() const { return bullets_; }
-
 	void OnCollision();
+
+	 void SetGameScene(GameScene* gameScene){ gameScene_ = gameScene; }
 private:
-	void fire();
+	void Fire();
 
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
@@ -47,8 +47,8 @@ private:
 
 	Phase phase_ = Phase::Apprach;
 
-	std::list<std::shared_ptr<EnemyBullet>> bullets_;
-
 	float Timer = 3.0f;
 	Player* player_ = nullptr;
+
+	GameScene* gameScene_ = nullptr;
 };

@@ -1,7 +1,7 @@
 #include "Skydome.h"
 
 void Skydome::Initialize(Model* model) {
-	assert(model);
+	//assert(model);
 	model_ = model;
 	worldTransform_.Initialize();
 }

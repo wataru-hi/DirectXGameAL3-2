@@ -6,6 +6,10 @@ using namespace KamataEngine;
 class Player;
 class Enemy;
 class Skydome;
+class RailCamera;
+class PlayerBulllet;
+class EnemyBullet;
+
 
 class GameScene
 {
@@ -35,9 +39,17 @@ class GameScene
 	/// </summary>
 	void Draw();
 
+	void AddPlayerBullet(std::shared_ptr<PlayerBulllet> playerBullet) { playerbullets_.push_back(playerBullet); }
+	void AddEnemyBullet(std::shared_ptr<EnemyBullet> enemyBullet) { enemybullets_.push_back(enemyBullet); }
+
 private:
 	bool IsCollisionSphereAndSphere(const Vector3& posA, float radiusA, const Vector3& posB, float radiusB);
 	void CheakAllCollisions();
+
+	void BulletUpdate();
+	void BulletDrow();
+
+	void LoadEnemyPopDate();
 
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
@@ -60,7 +72,11 @@ private:
 	Enemy* enemy_ = nullptr;
 	
 	Skydome* skydome_ = nullptr;
+	RailCamera* railCamera = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
+
+	std::list<std::shared_ptr<PlayerBulllet>>playerbullets_;
+	std::list<std::shared_ptr<EnemyBullet>>enemybullets_;
 
 	bool isDebugCameraActive_ = false;
 };

@@ -113,6 +113,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerBulllet.cpp" />
+    <ClCompile Include="RailCamera.cpp" />
     <ClCompile Include="Skydome.cpp" />
     <ClCompile Include="WorldTransformEX.cpp" />
   </ItemGroup>
@@ -198,6 +199,7 @@
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerBulllet.h" />
+    <ClInclude Include="RailCamera.h" />
     <ClInclude Include="Skydome.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

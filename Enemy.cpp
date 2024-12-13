@@ -3,11 +3,13 @@
 
 #include "Player.h"
 
+#include "GameScene.h"
+
 using namespace MathUtility;
 
 void Enemy::Initialize(Model* model, uint32_t textureHandle, const Vector3& position)
 {
-	assert(model);
+	//assert(model);
 	model_ = model;
 
 	textureHandle_ = textureHandle;
@@ -29,15 +31,9 @@ void Enemy::Update()
 
 	if (Timer < 0.0f)
 	{
-		fire();
+		Fire();
 		Timer = 1.5f;
 	}
-
-	for (std::shared_ptr<EnemyBullet> bullet : bullets_)
-	{
-		bullet->Update();
-	}
-	bullets_.remove_if([](const std::shared_ptr<EnemyBullet>& bullet) { return bullet->IsDead();});
 
 	worldTransform_.UpdateMatrix();
 }
@@ -45,11 +41,6 @@ void Enemy::Update()
 void Enemy::Draw(const Camera& camera)
 {
 	model_->Draw(worldTransform_, camera);
-
-	for (std::shared_ptr<EnemyBullet> enemyBullet : bullets_)
-	{
-		enemyBullet->Draw(camera);
-	}
 }
 
 void Enemy::Move()
@@ -73,10 +64,13 @@ void Enemy::PrintImGui()
 {
 	float pos[] = { worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z};
 
+	#ifdef _DEBUG
+
 	ImGui::Begin("enemy");
 	ImGui::DragFloat3("pos",pos, 0.1f);
 	ImGui::Text("Timer %f", Timer);
 	ImGui::End();
+#endif //  
 
 	Set(&(*pos), &worldTransform_.translation_);
 }
@@ -85,9 +79,9 @@ void Enemy::OnCollision()
 {
 }
 
-void Enemy::fire()
+void Enemy::Fire()
 {
-	const float kBulletSpeed = 1.0f;//弾の速さ
+	const float kBulletSpeed = 0.5f;//弾の速さ
 
 	const Vector3 playerPos = player_->GetWorldPosition();
 	const Vector3 enemyPos = GetWorldPosition();
@@ -98,5 +92,5 @@ void Enemy::fire()
 
 	std::shared_ptr<EnemyBullet> bullet(new EnemyBullet);
 	bullet->Initialize(model_, worldTransform_.translation_, direction);
-	bullets_.push_back(bullet);
+	gameScene_->AddEnemyBullet(bullet);
 }

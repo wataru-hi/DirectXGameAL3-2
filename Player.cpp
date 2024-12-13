@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "Affin.h"
+#include "PlayerBulllet.h"
+#include "GameScene.h"
 
 using namespace MathUtility;
 
@@ -7,21 +9,21 @@ Player::~Player()
 {
 }
 
-void Player::Initialize(Model* model, uint32_t textureHandle)
+void Player::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
 {
-	assert(model);
+	//assert(model);
 	model_ = model;
 	textureHandle_ = textureHandle;
 	worldTransform_.Initialize();
-
+	worldTransform_.translation_ = pos;
 	input_ = Input::GetInstance();
 }
 
 void Player::Update()
 {
-	bullets_.remove_if([](std::shared_ptr<PlayerBulllet> bullet) {return bullet->IsDead(); });
 
 	Vector3 move = {0,0,0};
+	BulletTimer -= 1.0f / 60.0f;
 
 	//押した方向で移動ベクトルを変更
 	if (input_->PushKey(DIK_LEFT)) {
@@ -43,9 +45,13 @@ void Player::Update()
 	
 	float PlayerTranslate[3] = {worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z};
 
+#ifdef _DEBUG
+
 	ImGui::Begin("data");
 	ImGui::DragFloat3("PlayerPos", PlayerTranslate, 0.1f, 1.0f);
 	ImGui::End();
+
+#endif // _DEBUG
 
 	worldTransform_.translation_.x = PlayerTranslate[0];
 	worldTransform_.translation_.y = PlayerTranslate[1];
@@ -58,24 +64,19 @@ void Player::Update()
 
 	Attack();
 
-	for (std::shared_ptr<PlayerBulllet> bullet : bullets_)
-	{
-		bullet->Update();
-	}
-
 	worldTransform_.UpdateMatrix();
 }
 
 void Player::Draw(Camera& camera)
 {
 	model_->Draw(worldTransform_, camera, textureHandle_);
-	for (std::shared_ptr<PlayerBulllet> bullet : bullets_)
-	{
-		bullet->Draw(camera);
-	}
 }
 void Player::OnCollision()
 {
+}
+void Player::SetParent(const WorldTransform* parent)
+{
+	worldTransform_.parent_ = parent;
 }
 void Player::Rotate()
 {
@@ -94,15 +95,15 @@ void Player::Rotate()
 
 void Player::Attack()
 {
-	if (input_->PushKey(DIK_SPACE))
+	if (input_->PushKey(DIK_SPACE) && BulletTimer < 0.0f)
 	{
 		Vector3 velocity(0, 0, kBulletSpeed);
 
 		velocity = TransformNormal(velocity, worldTransform_.matWorld_);
 
 		std::shared_ptr<PlayerBulllet> bullet = std::make_shared<PlayerBulllet>();
-		bullet->Initialize(model_, worldTransform_.translation_, velocity);
-		bullets_.push_back(bullet);
-			
+		bullet->Initialize(model_, GetWorldPosition(), velocity);
+		gameScene_->AddPlayerBullet(bullet);
+		BulletTimer = BulletTime;
 	}
 }

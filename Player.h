@@ -1,16 +1,17 @@
 #pragma once
 
 #include "KamataEngine.h"
-#include "PlayerBulllet.h"
 #include "Affin.h"
 
 using namespace KamataEngine;
+
+class GameScene;
 
 class Player
 {
 public:
 	~Player();
-	void Initialize(Model* model, uint32_t textureHandle);
+	void Initialize(Model* model, uint32_t textureHandle, Vector3 pos);
 
 	void Update();
 
@@ -18,9 +19,11 @@ public:
 
 	Vector3 GetWorldPosition(){ return GetWorldPos(worldTransform_); };
 
-	 const std::list<std::shared_ptr<PlayerBulllet>>& GetBullets() const { return bullets_; }
-
 	 void OnCollision();
+
+	 void SetParent(const WorldTransform* parent);
+
+	 void SetGameScene(GameScene* gameScene){ gameScene_ = gameScene; }
 private:
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
@@ -29,9 +32,6 @@ private:
 
 	void Rotate();
 	void Attack();
-	
-
-	std::list<std::shared_ptr<PlayerBulllet> >bullets_;
 
 	//キャラクターの移動速さ
 	const float kCaracterSpeed = 0.2f;
@@ -40,5 +40,8 @@ private:
 
 	const float kBulletSpeed = 1.0f;
 
-	
+	const float BulletTime = 1.5f;
+	float BulletTimer = 0.0f;
+
+	GameScene* gameScene_;
 };
