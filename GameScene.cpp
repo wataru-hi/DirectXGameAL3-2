@@ -1,5 +1,8 @@
 #include "GameScene.h"
 
+
+#include "Skydome.h"
+
 #include "Enemy.h"
 #include "Player.h"
 
@@ -19,6 +22,10 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
+
+	skydomeModel_ = Model::CreateFromOBJ("SkyDome"); // Skydome.objを読み込む
+    skydome_ = new Skydome();
+    skydome_->Initialize(skydomeModel_);
 
 	playerTextureHandle_ = TextureManager::Load("mario.jpg");
 	playerModel_ = Model::Create();
@@ -41,6 +48,8 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	 skydome_->Update();
+	
 	player_->Update();
 	enemy_->Update();
 	CheakAllCollisions();
@@ -86,6 +95,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
+	
+	 skydome_->Draw(camera); 
+
 	if (enemy_ != nullptr) {
 		enemy_->Draw(camera);
 	}

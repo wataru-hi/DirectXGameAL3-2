@@ -1,10 +1,11 @@
 #pragma once
 
-#include <KamataEngine.h>
+#include "KamataEngine.h"
 
 using namespace KamataEngine;
 class Player;
 class Enemy;
+class Skydome;
 
 class GameScene
 {
@@ -48,12 +49,17 @@ private:
 	/// 
 	uint32_t playerTextureHandle_ = 0;
 	uint32_t enemyTextureHandle_ = 0;
+
 	Model* playerModel_ = nullptr;
 	Model* enemyModel_ = nullptr;
+    Model* skydomeModel_ = nullptr;
+	
 	Camera camera;
+	
 	Player* player_ = nullptr;
 	Enemy* enemy_ = nullptr;
-	//std::list<std::shared_ptr<Enemy>> enemies_;
+	
+	Skydome* skydome_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 
 	bool isDebugCameraActive_ = false;
