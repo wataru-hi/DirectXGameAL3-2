@@ -25,7 +25,7 @@ void Enemy::Update()
 	Timer -= 1.0f / 60.0f;
 
 	//worldTransform_.translation_.z += moveSpeed;
-	//Move();
+	Move();
 
 	PrintImGui();
 
@@ -64,7 +64,7 @@ void Enemy::PrintImGui()
 {
 	float pos[] = { worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z};
 
-	#ifdef _DEBUG
+#ifdef _DEBUG
 
 	ImGui::Begin("enemy");
 	ImGui::DragFloat3("pos",pos, 0.1f);

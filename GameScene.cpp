@@ -53,20 +53,16 @@ void GameScene::Initialize() {
 
 	player_->SetGameScene(this);
 
+	//csvファイルデータ
+	LoadEnemyPopDate();
+
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
 	AxisIndicator::GetInstance()->SetTargetCamera(&camera);
 }
 
 void GameScene::Update() {
-	if (popIsDirei) {
-		waitTimer--;
-		if (waitTimer <= 0)
-		{
-			popIsDirei = false;
-		}
-		return;
-	}
+	UpdateEnemyPopDate();
 	
 	skydome_->Update();
 	for (std::shared_ptr<Enemy> enemy : enemies)
@@ -82,7 +78,7 @@ void GameScene::Update() {
 	railCamera->Update();
 	camera.matView = railCamera->GetCamera().matView;
 	camera.matProjection = railCamera->GetCamera().matProjection;
-	camera.UpdateMatrix();
+	camera.TransferMatrix();
 
 #ifdef _DEBUG
 	if (input_->TriggerKey(DIK_Q)) {
@@ -95,8 +91,6 @@ void GameScene::Update() {
 		camera.matProjection = debugCamera_->GetCamera().matProjection;
 		// ビュープロジェクションの転送
 		camera.TransferMatrix();
-	} else {
-		camera.UpdateMatrix();
 	}
 }
 
@@ -131,7 +125,7 @@ void GameScene::Draw() {
 
 	for (std::shared_ptr<Enemy> enemy : enemies)
 	{
-		enemy->Update();
+		enemy->Draw(camera);
 	}
 
 	BulletDrow();
@@ -213,19 +207,27 @@ void GameScene::BulletDrow() {
 
 void GameScene::LoadEnemyPopDate() {
 	std::ifstream file;
-	std::stringstream enemyPopCommands; // Declare enemyPopCommands
 
-	file.open("CSVのファイルパス"); // Added closing quote
+	file.open("Resources/EnemyPop.csv"); // Added closing quote
 #ifdef _DEBUG
 	assert(file.is_open());
 #endif
-	enemyPopCommands << file.rdbuf();
+	enemyPosCommand << file.rdbuf();
 
 	file.close();
 }
 
 void GameScene::UpdateEnemyPopDate() {
 	std::string line;
+
+	if (popIsDirei) {
+		waitTimer--;
+		if (waitTimer <= 0)
+		{
+			popIsDirei = false;
+		}
+		return;
+	}
 
 	while (std::getline(enemyPosCommand, line)) {
 		std::istringstream line_stream(line);

@@ -25,8 +25,6 @@ public:
 
 	void PrintImGui();
 
-	void Set(float* a, Vector3* b) { b->x = a[0], b->y = a[1], b->z = a[2]; }
-
 	void SetPlayer(Player* player){ player_ = player; }
 
 	bool IsDead() const { return isDead_; }
@@ -35,10 +33,11 @@ public:
 
 	void OnCollision();
 
-	 void SetGameScene(GameScene* gameScene){ gameScene_ = gameScene; }
+	void SetGameScene(GameScene* gameScene){ gameScene_ = gameScene; }
 private:
 	void Fire();
 
+	void Set(float* a, Vector3* b) { b->x = a[0], b->y = a[1], b->z = a[2]; }
 	Model* model_ = nullptr;
 	WorldTransform worldTransform_;
 	uint32_t textureHandle_ = 0;
