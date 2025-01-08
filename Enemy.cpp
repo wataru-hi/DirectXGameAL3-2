@@ -35,6 +35,12 @@ void Enemy::Update()
 		Timer = 1.5f;
 	}
 
+	Vector3 playerPos = player_->GetWorldPosition();
+	if (worldTransform_.translation_.z < (playerPos.z + 10.0f))
+	{
+		isDead_ = true;
+	}
+
 	worldTransform_.UpdateMatrix();
 }
 
@@ -77,6 +83,7 @@ void Enemy::PrintImGui()
 
 void Enemy::OnCollision()
 {
+	isDead_ = true;
 }
 
 void Enemy::Fire()

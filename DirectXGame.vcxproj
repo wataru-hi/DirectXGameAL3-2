@@ -115,6 +115,8 @@
     <ClCompile Include="PlayerBulllet.cpp" />
     <ClCompile Include="RailCamera.cpp" />
     <ClCompile Include="Skydome.cpp" />
+    <ClCompile Include="Title.cpp" />
+    <ClCompile Include="TitleSccene.cpp" />
     <ClCompile Include="WorldTransformEX.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -201,6 +203,8 @@
     <ClInclude Include="PlayerBulllet.h" />
     <ClInclude Include="RailCamera.h" />
     <ClInclude Include="Skydome.h" />
+    <ClInclude Include="Title.h" />
+    <ClInclude Include="TitleSccene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

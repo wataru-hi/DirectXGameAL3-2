@@ -35,8 +35,8 @@ private:
 
 	//キャラクターの移動速さ
 	const float kCaracterSpeed = 0.2f;
-	const float kMoveLimitX = 34.0f;
-	const float kMoveLimitY = 18.0f;
+	const float kMoveLimitX = 13.0f;
+	const float kMoveLimitY = 7.0f;
 
 	const float kBulletSpeed = 1.0f;
 
@@ -44,5 +44,8 @@ private:
 	float BulletTimer = 0.0f;
 
 	GameScene* gameScene_;
+
+	Audio* audio_= nullptr;
+	uint32_t shot = 0;
 
 };

@@ -1,6 +1,29 @@
-#include <KamataEngine.h>
 #include "GameScene.h"
+#include <KamataEngine.h>
 using namespace KamataEngine;
+#include <map>
+
+enum class SceneSelect {
+	Title,
+	Game,
+	Clear,
+	Over,
+};
+
+std::map<SceneSelect, SceneSelect> ChangeScene{
+    {SceneSelect::Title, SceneSelect::Game },
+    {SceneSelect::Clear, SceneSelect::Title},
+    {SceneSelect::Over,  SceneSelect::Title},
+};
+
+std::map<bool, SceneSelect> SetScene{
+    {false, SceneSelect::Clear},
+    {true,  SceneSelect::Over },
+};
+
+void Drowback(DirectXCommon* dxCommon);
+
+SceneSelect scene = SceneSelect::Title;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -68,7 +91,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 入力関連の毎フレーム処理
 		input->Update();
 
-		gameScene->Update();
+		if (scene == SceneSelect::Game) {
+			gameScene->Update();
+			if (gameScene->isEnd()) {
+				scene = SetScene[gameScene->isDead()];
+				gameScene->ClearScene();
+			}
+		} else {
+			if (input->TriggerKey(DIK_SPACE)) {
+				scene = ChangeScene[scene];
+				gameScene->Initialize();
+			}
+		}
+
 		// 軸表示の更新
 		axisIndicator->Update();
 		// ImGui受付終了
@@ -77,7 +112,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 描画開始
 		dxCommon->PreDraw();
 
-		gameScene->Draw();
+		if (scene == SceneSelect::Game) {
+			gameScene->Draw();
+		} else {
+			Drowback(dxCommon);
+		}
 
 		// 軸表示の描画
 		axisIndicator->Draw();
@@ -100,4 +139,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	win->TerminateGameWindow();
 
 	return 0;
+}
+
+void Drowback(DirectXCommon* dxCommon) {
+	Sprite::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kWindowHeight);
+
+	uint32_t title = TextureManager::Load("Title.png");
+	Sprite* titleSprite = Sprite::Create(title, {1280, 720});
+	uint32_t die = TextureManager::Load("Die.png");
+	Sprite* dieSprite = Sprite::Create(die, {1280, 720});
+	uint32_t clear = TextureManager::Load("clear.png");
+	Sprite* clearSprite = Sprite::Create(clear, {1280, 720});
+
+	ID3D12GraphicsCommandList* commandList = dxCommon->GetCommandList();
+
+	Sprite::PreDraw(commandList);
+
+	if (scene == SceneSelect::Title) {
+		titleSprite->Draw();
+	}
+	if (scene == SceneSelect::Over) {
+		dieSprite->Draw();
+	}
+	if (scene == SceneSelect::Clear) {
+		clearSprite->Draw();
+	}
+
+	Sprite::PostDraw();
 }

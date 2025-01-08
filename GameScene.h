@@ -44,6 +44,15 @@ class GameScene
 	void AddPlayerBullet(std::shared_ptr<PlayerBulllet> playerBullet) { playerbullets_.push_back(playerBullet); }
 	void AddEnemyBullet(std::shared_ptr<EnemyBullet> enemyBullet) { enemybullets_.push_back(enemyBullet); }
 
+	bool isEnd(){return gameEnd;}
+	bool isDead(){return dead;}
+	void ClearScene() {
+		enemies.clear();
+		playerbullets_.clear();
+		enemybullets_.clear();
+		audio_->StopWave(BGMStart);
+		start = false;
+	}
 private:
 	bool IsCollisionSphereAndSphere(const Vector3& posA, float radiusA, const Vector3& posB, float radiusB);
 	void CheakAllCollisions();
@@ -87,5 +96,14 @@ private:
 
 	bool popIsDirei;
 	int32_t waitTimer;
+
+	bool gameEnd = false;
+	int time;
+	int enemyKillCount;
+	bool dead;
+
+	uint32_t BGMHandle = 0;
+	uint32_t BGMStart = 0;
+	bool start = false;
 };
 

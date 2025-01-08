@@ -20,6 +20,10 @@ GameScene::~GameScene() {
 	delete playerModel_;
 	delete enemyModel_;
 	delete debugCamera_;
+
+	enemies.clear();
+	playerbullets_.clear();
+	enemybullets_.clear();
 }
 
 void GameScene::Initialize() {
@@ -40,15 +44,14 @@ void GameScene::Initialize() {
 
 	camera.Initialize();
 
-	player_ = new Player();
-	
-
 	railCamera = new RailCamera();
 	railCamera->Initialize(camera.translation_, camera.rotation_);
 
+
+	player_ = new Player();
 	player_->SetParent(&railCamera->GetWorldTransform());
 
-	Vector3 playerPostion(0.0f, 0.0f, 10.0f);
+	Vector3 playerPostion(0.0f, 0.0f, 20.0f);
 	player_->Initialize(playerModel_, playerTextureHandle_, playerPostion);
 
 	player_->SetGameScene(this);
@@ -59,16 +62,43 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(true);
 	AxisIndicator::GetInstance()->SetTargetCamera(&camera);
+
+	gameEnd = false;
+	dead = false;
+	time = 0;
+	enemyKillCount = 0;
+	BGMHandle = audio_->LoadWave("Viper.mp3");
+	
+
 }
 
 void GameScene::Update() {
 	UpdateEnemyPopDate();
-	
+
+	if (!start)
+	{
+		
+	BGMStart = audio_->PlayWave(BGMHandle, true);
+	start = true;
+	}
+
+	time++;
+	if (time == 1100)
+	{
+		gameEnd = true;
+	}
+	if (enemyKillCount == 2)
+	{
+		gameEnd = true;
+	}
 	skydome_->Update();
 	for (std::shared_ptr<Enemy> enemy : enemies)
 	{
 		enemy->Update();
 	}
+
+	enemies.remove_if([](std::shared_ptr<Enemy> a) { return a->IsDead(); });
+
 	player_->Update();
 	
 
@@ -84,6 +114,10 @@ void GameScene::Update() {
 	if (input_->TriggerKey(DIK_Q)) {
 		isDebugCameraActive_ = !isDebugCameraActive_;
 	}
+
+	ImGui::Begin("p");
+	ImGui::Text("%d",time);
+	ImGui::End();
 #endif
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
@@ -166,6 +200,8 @@ void GameScene::CheakAllCollisions() {
 		if (IsCollisionSphereAndSphere(playerPos, playerRadius, bulletPos, bulletRadius)) {
 			player_->OnCollision();
 			bullet->OnCollision();
+			gameEnd = true;
+			dead = true;
 		}
 	}
 
@@ -180,6 +216,7 @@ void GameScene::CheakAllCollisions() {
 			if (IsCollisionSphereAndSphere(enemyPos, enemyRadius, bulletPos, bulletRadius)) {
 				enemy->OnCollision();
 				bullet->OnCollision();
+				enemyKillCount++;
 			}
 		}
 	}
@@ -219,7 +256,6 @@ void GameScene::LoadEnemyPopDate() {
 
 void GameScene::UpdateEnemyPopDate() {
 	std::string line;
-
 	if (popIsDirei) {
 		waitTimer--;
 		if (waitTimer <= 0)

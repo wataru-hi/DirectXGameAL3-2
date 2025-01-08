@@ -17,6 +17,8 @@ void Player::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = pos;
 	input_ = Input::GetInstance();
+	audio_ = Audio::GetInstance();
+	shot = audio_ ->LoadWave("Shot.mp3");
 }
 
 void Player::Update()
@@ -43,19 +45,13 @@ void Player::Update()
 
 	worldTransform_.translation_ += move;
 	
-	float PlayerTranslate[3] = {worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z};
-
 #ifdef _DEBUG
 
 	ImGui::Begin("data");
-	ImGui::DragFloat3("PlayerPos", PlayerTranslate, 0.1f, 1.0f);
+	ImGui::DragFloat3("PlayerPos", &worldTransform_.translation_.x, 0.1f, 1.0f);
 	ImGui::End();
 
 #endif // _DEBUG
-
-	worldTransform_.translation_.x = PlayerTranslate[0];
-	worldTransform_.translation_.y = PlayerTranslate[1];
-	worldTransform_.translation_.z = PlayerTranslate[2];
 
 	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -kMoveLimitX);
 	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +kMoveLimitX);
@@ -95,6 +91,7 @@ void Player::Rotate()
 
 void Player::Attack()
 {
+	
 	if (input_->PushKey(DIK_SPACE) && BulletTimer < 0.0f)
 	{
 		Vector3 velocity(0, 0, kBulletSpeed);
@@ -105,5 +102,7 @@ void Player::Attack()
 		bullet->Initialize(model_, GetWorldPosition(), velocity);
 		gameScene_->AddPlayerBullet(bullet);
 		BulletTimer = BulletTime;
+
+		audio_->PlayWave(shot);
 	}
 }
