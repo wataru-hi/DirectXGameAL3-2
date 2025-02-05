@@ -145,11 +145,11 @@ void Drowback(DirectXCommon* dxCommon) {
 	Sprite::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kWindowHeight);
 
 	uint32_t title = TextureManager::Load("Title.png");
-	Sprite* titleSprite = Sprite::Create(title, {1280, 720});
+	Sprite* titleSprite = Sprite::Create(title, {0, 0});
 	uint32_t die = TextureManager::Load("Die.png");
-	Sprite* dieSprite = Sprite::Create(die, {1280, 720});
+	Sprite* dieSprite = Sprite::Create(die, {0,0});
 	uint32_t clear = TextureManager::Load("clear.png");
-	Sprite* clearSprite = Sprite::Create(clear, {1280, 720});
+	Sprite* clearSprite = Sprite::Create(clear, {0, 0});
 
 	ID3D12GraphicsCommandList* commandList = dxCommon->GetCommandList();
 
